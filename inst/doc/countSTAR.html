@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Getting Started with countSTAR</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Getting Started with countSTAR</h1>
+
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>The <code>countSTAR</code> package implements a variety of methods to
+analyze diverse count-valued data, all based on the idea of Simultaneous
+Transformation and Rounding (STAR). The package functionality is broadly
+split into three categories: Bayesian estimation of STAR models (<span class="citation">Kowal and Canale (<a href="#ref-Kowal2020a" role="doc-biblioref">2020</a>)</span>, <span class="citation">Kowal and
+Wu (<a href="#ref-kowalSTARconjugate" role="doc-biblioref">2022</a>)</span>), frequentist/classical estimation
+(<span class="citation">Kowal and Wu (<a href="#ref-kowal2021semiparametric" role="doc-biblioref">2021</a>)</span>), and time series analysis using
+warped Dynamic Linear Models (<span class="citation">King and Kowal (<a href="#ref-king2021warped" role="doc-biblioref">2021</a>)</span>).</p>
+<p>We give a brief description of the STAR framework, before diving into
+specific examples that show the <code>countSTAR</code>
+functionality.</p>
+</div>
+<div id="star-model-overview" class="section level1">
+<h1>STAR Model Overview</h1>
+<p>STAR models build upon continuous data models to provide a <em>valid
+count-valued data-generating process</em>. An example STAR model for
+linear regression is as follows: <span class="math display">\[\begin{align*}
+y_i &amp;= \mbox{floor}(y_i^*) \\
+z_i^* &amp;= \log(y_i^*) \\
+z_i^* &amp;= x_i&#39;\beta + \epsilon_i, \quad \epsilon_i
+\stackrel{iid}{\sim}N(0, \sigma^2)
+\end{align*}\]</span> The latent data <span class="math inline">\(y_i^*\)</span> act as a <em>continuous proxy</em>
+for the count data <span class="math inline">\(y_i\)</span>, which is
+easier to model yet has a simple mapping via the floor function to the
+observed data. The latent data <span class="math inline">\(y_i^*\)</span> are transformed to <span class="math inline">\(z_i^*\)</span>, as in common practice, and modeled
+using Gaussian linear regression. This model inherits the same structure
+as before, but the data-generating process is now count-valued.</p>
+<p>More generally, STAR models are defined via a <em>rounding
+operator</em> <span class="math inline">\(h\)</span>, a (known or
+unknown) <em>transformation</em> <span class="math inline">\(g\)</span>,
+and a <em>continuous data model</em> <span class="math inline">\(\Pi_\theta\)</span> with unknown parameters <span class="math inline">\(\theta\)</span>: <span class="math display">\[\begin{align*}
+y &amp;= h(y^*) \quad \mbox{(rounding)}\\
+z^* &amp;= g(y^*) \quad \mbox{(transformation)}\\
+z^* &amp; \sim \Pi_\theta \quad \mbox{(model)}\\
+\end{align*}\]</span> Importantly, STAR models are highly flexible
+count-valued processes, and provide the capability to model (i) discrete
+data, (ii) zero-inflation, (iii) over- or under-dispersion, and (iv)
+bounded or censored data.</p>
+<p>We focus on conditionally Gaussian models of the form <span class="math display">\[
+z^*(x) = \mu_\theta(x) + \epsilon(x), \quad \epsilon(x)
+\stackrel{iid}{\sim}N(0, \sigma^2)
+\]</span> where <span class="math inline">\(\mu_\theta(x)\)</span> is
+the conditional expectation of the transformed latent data with unknown
+parameters <span class="math inline">\(\theta\)</span>. Examples include
+linear, additive, and tree-based regression models.</p>
+<div id="the-rounding-operator" class="section level2">
+<h2>The Rounding Operator</h2>
+<p>The rounding operator <span class="math inline">\(h\)</span> is a
+many-to-one function that sets <span class="math inline">\(y =
+j\)</span> whenever <span class="math inline">\(y^*\in
+\mathcal{A}_j\)</span> or equivalently when <span class="math inline">\(z^*=g(y^*) \in g(\mathcal{A}_j)\)</span> . It
+could take many different forms, but generally the floor function, i.e
+where <span class="math inline">\(\mathcal{A}_j := [j, j+1)\)</span>
+works well as a default, with the modification <span class="math inline">\(g(\mathcal{A}_0) := (-\infty, 0)\)</span> so that
+<span class="math inline">\(y = 0\)</span> whenever <span class="math inline">\(z^* &lt; 0\)</span>. This latter modification
+ensures that much of the latent space is mapped to zero, and therefore
+STAR models can easily account for zero-inflation. Furthermore, when
+there is a known upper bound <code>y_max</code><span class="math inline">\(=K\)</span> for the data, there is an additional
+change to incorporate this structure, namely we let <span class="math inline">\(g(\mathcal{A}_K) := [g(a_K), \infty)\)</span>.</p>
+<p>The rounding operator and its inverse are implemented in
+<code>countSTAR</code> with the functions <code>a_j()</code> and
+<code>round_fun()</code>, although these rarely need to be employed by
+the end user. Instead, the only thing that might need to be specified by
+the user would be whether an upper bound for the data exists, in which
+case there is a simple option of setting <code>y_max</code> in each of
+the modeling functions that will then be passed to the rounding
+function.</p>
+</div>
+<div id="the-transformation-function" class="section level2">
+<h2>The Transformation Function</h2>
+<p>There are a variety of options for the transformation function <span class="math inline">\(g\)</span>, ranging from fixed functions to
+a-priori data-driven transformations to transformations learned along
+with the rest of the model. All models in <code>countSTAR</code> support
+three common fixed transformations: log, square root (‘sqrt’), and the
+identity transformation (essentially a rounding-only model).
+Furthermore, all functions support a set of transformations which are
+learned by matching marginal moments of the data <span class="math inline">\(y\)</span> to the latent <span class="math inline">\(z\)</span>:</p>
+<ul>
+<li><code>transformation=&#39;pois&#39;</code> uses a moment-matched marginal
+Poisson CDF</li>
+<li><code>transformation=&#39;neg-bin&#39;</code> uses a moment-matched marginal
+Negative Binomial CDF</li>
+<li><code>transformation=&#39;np&#39;</code> is a nonparametric transformation
+estimated from the empirical CDF of <span class="math inline">\(y\)</span>.</li>
+</ul>
+<p>Details on the estimation of these transformations can be found in
+<span class="citation">Kowal and Wu (<a href="#ref-kowal2021semiparametric" role="doc-biblioref">2021</a>)</span>. In particular the “np”
+transformation has proven very effective, especially for heaped data,
+and is the default across all functions.</p>
+<p>Some STAR methods also support ways of learning the transformation
+alongside the model:</p>
+<ul>
+<li><code>transformation=&#39;box-cox&#39;</code>: the transformation is assumed
+to belong to the Box-Cox family; the sampler samples the <span class="math inline">\(\lambda\)</span> parameter</li>
+<li><code>transformation=&#39;ispline&#39;</code>: the transformation is modeled
+as an unknown, monotone function using I-splines. The Robust Adaptive
+Metropolis (RAM) sampler is used for drawing the parameter of the
+transformation function.</li>
+<li><code>transformation=&#39;bnp&#39;</code>: the transformation is modeled
+using the Bayesian bootstrap, a Bayesian nonparametric model that
+incorporates the uncertainty about the transformation into posterior and
+predictive inference.</li>
+</ul>
+<p>These learned transformations are not always available in every
+function; check the appropriate help page to see what options are
+supported.</p>
+</div>
+</div>
+<div id="count-valued-data-the-roaches-dataset" class="section level1">
+<h1>Count-Valued Data: The Roaches Dataset</h1>
+<p>As an example of complex count-valued data, consider the
+<code>roaches</code> data from <span class="citation">Gelman and Hill
+(<a href="#ref-Gelman_Hill_2006" role="doc-biblioref">2006</a>)</span>.
+The response variable, <span class="math inline">\(y_i\)</span>, is the
+number of roaches caught in traps in apartment <span class="math inline">\(i\)</span>, with <span class="math inline">\(i=1,\ldots, n = 262\)</span>.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Source: http://mc-stan.org/rstanarm/articles/count.html</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#install.packages(&quot;rstanarm&quot;)</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(roaches, <span class="at">package=</span><span class="st">&quot;rstanarm&quot;</span>) </span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Roaches:</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>y <span class="ot">=</span> roaches<span class="sc">$</span>y</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Function to plot the point mass function:</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>stickplot <span class="ot">=</span> <span class="cf">function</span>(y, ...){</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  js <span class="ot">=</span> <span class="dv">0</span><span class="sc">:</span><span class="fu">max</span>(y); </span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(js, </span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>       <span class="fu">sapply</span>(js, <span class="cf">function</span>(js) <span class="fu">mean</span>(js <span class="sc">==</span> y)), </span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">type=</span><span class="st">&#39;h&#39;</span>, <span class="at">lwd=</span><span class="dv">2</span>, ...)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">stickplot</span>(y, <span class="at">main =</span> <span class="st">&#39;PMF: Roaches Data&#39;</span>,</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>          <span class="at">xlab =</span> <span class="st">&#39;Roaches&#39;</span>, <span class="at">ylab =</span> <span class="st">&#39;Probability mass&#39;</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>There are several notable features in the data:</p>
+<ol style="list-style-type: decimal">
+<li>Zero-inflation: 36% of the observations are zeros.</li>
+<li>(Right-) Skewness, which is clear from the histogram and common for
+(zero-inflated) count data.</li>
+<li>Overdispersion: the sample mean is 26 and the sample variance is
+2585.</li>
+</ol>
+<p>A pest management treatment was applied to a subset of 158
+apartments, with the remaining 104 apartments receiving a control.
+Additional data are available on the pre-treatment number of roaches,
+whether the apartment building is restricted to elderly residents, and
+the number of days for which the traps were exposed. We are interested
+in modeling how the roach incidence varies with these predictors.</p>
+</div>
+<div id="frequentist-inference-for-star-models" class="section level1">
+<h1>Frequentist inference for STAR models</h1>
+<p>Frequentist (or classical) estimation and inference for STAR models
+is provided by an EM algorithm. Sufficient for estimation is an
+<code>estimator</code> function which solves the least squares (or
+Gaussian maximum likelihood) problem associated with <span class="math inline">\(\mu_\theta\)</span>—or in other words, the
+estimator that <em>would</em> be used for Gaussian or continuous data.
+Specifically, <code>estimator</code> inputs data and outputs a list with
+two elements: the estimated <code>coefficients</code> <span class="math inline">\(\hat \theta\)</span> and the
+<code>fitted.values</code> <span class="math inline">\(\hat
+\mu_\theta(x_i) = \mu_{\hat \theta}(x_i)\)</span>.</p>
+<div id="the-classical-linear-model" class="section level2">
+<h2>The Classical Linear Model</h2>
+<p>For many applications, the STAR linear model is often the first
+method to try. In <code>countSTAR</code>, the linear model is
+implemented with the <code>lm_star</code> function, which aims to mimic
+the functionality of <code>lm</code> by allowing users to input a
+formula. Standard functions like <code>coef</code> and
+<code>fitted</code> can be used on the output to extract coefficients
+and fitted values, respectively.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(countSTAR)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Select a transformation:</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>transformation <span class="ot">=</span> <span class="st">&#39;np&#39;</span> <span class="co"># Estimated transformation using empirical CDF</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># EM algorithm for STAR (using the log-link)</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>fit_em <span class="ot">=</span> <span class="fu">lm_star</span>(y <span class="sc">~</span> roach1 <span class="sc">+</span> treatment <span class="sc">+</span> senior <span class="sc">+</span> <span class="fu">log</span>(exposure2),</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>                 <span class="at">data =</span> roaches, <span class="at">transformation =</span> transformation)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Dimensions:</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>n <span class="ot">=</span> <span class="fu">nrow</span>(fit_em<span class="sc">$</span>X); p <span class="ot">=</span> <span class="fu">ncol</span>(fit_em<span class="sc">$</span>X)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Fitted coefficients:</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">coef</span>(fit_em), <span class="dv">3</span>)</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    (Intercept)         roach1      treatment         senior log(exposure2) </span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          0.035          0.006         -0.285         -0.321          0.216</span></span></code></pre></div>
+<p>Here the <code>np</code> transformation was used, but other options
+are available; see <code>?lm_star</code> for details.</p>
+<p>Based on the fitted STAR linear model, we may further obtain
+<em>confidence intervals</em> for the estimated coefficients using
+<code>confint</code>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Confidence interval for all coefficients</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(fit_em)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                       2.5 %       97.5 %</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)    -0.137605372  0.207272866</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; roach1          0.004901028  0.007465727</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; treatment      -0.485871892 -0.085051689</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; senior         -0.545525886 -0.100238952</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; log(exposure2) -0.197831493  0.638077988</span></span></code></pre></div>
+<p>Similarly, <em>p-values</em> are available using likelihood ratio
+tests, which can be applied for individual coefficients,</p>
+<p><span class="math display">\[
+H_0: \beta_j= 0 \quad \mbox{vs} \quad H_1: \beta_j \ne 0
+\]</span></p>
+<p>or for joint sets of variables, analogous to a (partial) F-test:</p>
+<p><span class="math display">\[
+H_0: \beta_1=\ldots=\beta_p = 0, \quad \mbox{vs.} \quad H_1: \beta_j \ne
+0 \mbox{ for some } j=1,\ldots,p
+\]</span> P-values for all individual coefficients as well as the
+p-value for <em>any</em> effects are computed with the
+<code>pvals</code> function.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># P-values:</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">pvals</span>(fit_em))</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        (Intercept)             roach1          treatment             senior </span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       6.973324e-01       1.887408e-18       5.600907e-03       4.862498e-03 </span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     log(exposure2) Any linear effects </span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       3.072372e-01       9.271138e-20</span></span></code></pre></div>
+<p>Finally, we can get predictions at new data points (or the training
+data) using <code>predict</code>, which actually outputs samples from
+the . Optionally, prediction intervals can be estimated using the
+(plug-in) predictive distribution at the MLEs (see
+<code>?predict.lmstar</code> for details). Note that the “plug-in”
+predictive distribution is a crude approximation, and better approaches
+for uncertainty quantification are available using the Bayesian
+models.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Compute the predictive draws (just using observed points here)</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>y_pred <span class="ot">=</span> <span class="fu">predict</span>(fit_em)</span></code></pre></div>
+</div>
+<div id="machine-learning-models" class="section level2">
+<h2>Machine Learning Models</h2>
+<p>In addition to the linear model, <code>countSTAR</code> also has
+implementations for STAR models paired with more flexible regression
+methods, in particular random forests (<code>randomForest_star()</code>)
+and generalized boosted machines (<code>gbm_star()</code>). In these
+functions, the user directly inputs the set of predictors <span class="math inline">\(X\)</span> alongside any test points in <span class="math inline">\(X_{test}\)</span>, as can be seen in the example
+below</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Select a transformation:</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>transformation <span class="ot">=</span> <span class="st">&#39;np&#39;</span> <span class="co"># Estimated transformation using empirical CDF</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Construct data matrix</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>y <span class="ot">=</span> roaches<span class="sc">$</span>y</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>X <span class="ot">=</span> roaches[, <span class="fu">c</span>(<span class="st">&quot;roach1&quot;</span>, <span class="st">&quot;treatment&quot;</span>, <span class="st">&quot;senior&quot;</span>, <span class="st">&quot;exposure2&quot;</span>)]</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">#Fit STAR with random forests</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>fit_rf <span class="ot">=</span> <span class="fu">randomForest_star</span>(y, X, <span class="at">transformation =</span> transformation)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">#Fit STAR with GBM</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>fit_gbm <span class="ot">=</span> <span class="fu">gbm_star</span>(y, X, <span class="at">transformation =</span> transformation)</span></code></pre></div>
+<p>For all frequentist models, the functions output log-likelihood
+values at the MLEs, which allows for a quick comparison of model
+fit.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Look at -2*log-likelihood</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="sc">-</span><span class="dv">2</span><span class="sc">*</span><span class="fu">c</span>(fit_rf<span class="sc">$</span>logLik, fit_gbm<span class="sc">$</span>logLik))</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1668.765 1594.125</span></span></code></pre></div>
+<p>In this case, it seems the GBM model has better fit to the data,
+although this could be further backed up by performing an out-of-sample
+comparison of the two models.</p>
+</div>
+</div>
+<div id="bayesian-inference-for-star-models" class="section level1">
+<h1>Bayesian inference for STAR models</h1>
+<p>For a Bayesian model, STAR requires only an algorithm for
+<em>initializing and sampling</em> from the posterior distribution under
+a <em>continuous data model</em>. More specifically, posterior inference
+under STAR is based on a Gibbs sampler, which augments the
+aforementioned continuous sampler with a draw from <span class="math inline">\([z^* | y, \theta]\)</span>. When <span class="math inline">\(\Pi_\theta\)</span> is conditionally Gaussian,
+<span class="math inline">\([z^* | y, \theta]\)</span> is a truncated
+Gaussian distribution.</p>
+<div id="linear-model" class="section level2">
+<h2>Linear Model</h2>
+<p>As an illustration, consider the Bayesian linear regression model
+<span class="math display">\[\begin{align*}
+z_i^* &amp;= x_i&#39;\beta + \epsilon_i, \quad \epsilon_i
+\stackrel{iid}{\sim}N(0, \sigma^2) \\
+\sigma^2 &amp;\sim \mbox{Gamma}(\alpha=0.001, \beta=0.001) \;.
+\end{align*}\]</span> The model is completed by assigning a prior
+structure for <span class="math inline">\(\beta\)</span>. The default in
+<code>countSTAR</code> is Zellner’s g-prior, which has the most
+functionality, but other options are available (namely horseshoe and
+ridge priors). The model is estimated using <code>blm_star()</code>.
+Note that for the Bayesian models in <code>countSTAR</code>, the user
+must supply the design matrix <span class="math inline">\(X\)</span>
+(and if predictions are desired, a matrix of predictors at the test
+points). We apply this to the roaches data, now using the default
+nonparametric transformation.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>X <span class="ot">=</span> <span class="fu">model.matrix</span>(y <span class="sc">~</span> roach1 <span class="sc">+</span> treatment <span class="sc">+</span> senior <span class="sc">+</span> <span class="fu">log</span>(exposure2),</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">data =</span> roaches)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Dimensions:</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>n <span class="ot">=</span> <span class="fu">nrow</span>(X); p <span class="ot">=</span> <span class="fu">ncol</span>(X)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>fit_blm <span class="ot">=</span> <span class="fu">blm_star</span>(<span class="at">y =</span> y, <span class="at">X=</span>X, <span class="at">transformation =</span> <span class="st">&#39;np&#39;</span>)</span></code></pre></div>
+<p>By default, the function uses a Gibbs sampler to draw from the
+posterior, but in some settings exact inference can be performed (see
+<span class="citation">Kowal and Wu (<a href="#ref-kowalSTARconjugate" role="doc-biblioref">2022</a>)</span> for details). To enable this, one
+can simply set <code>use_MCMC=FALSE</code>. In either case, the output
+of the function should be much the same, with the exception that <span class="math inline">\(\sigma\)</span> is estimated a priori and thus has
+no posterior draws.</p>
+<p>Posterior expectations and posterior credible intervals from the
+model are available as follows:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Posterior mean of each coefficient:</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">coef</span>(fit_blm),<span class="dv">3</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    (Intercept)         roach1      treatment         senior log(exposure2) </span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          0.030          0.006         -0.287         -0.325          0.212</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Credible intervals for regression coefficients</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>ci_all_bayes <span class="ot">=</span> <span class="fu">apply</span>(fit_blm<span class="sc">$</span>post.beta,</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>      <span class="dv">2</span>, <span class="cf">function</span>(x) <span class="fu">quantile</span>(x, <span class="fu">c</span>(.<span class="dv">025</span>, .<span class="dv">975</span>)))</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Rename and print:</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(ci_all_bayes) <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&#39;Lower&#39;</span>, <span class="st">&#39;Upper&#39;</span>)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">t</span>(<span class="fu">round</span>(ci_all_bayes, <span class="dv">3</span>)))</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                 Lower  Upper</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)    -0.150  0.211</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; roach1          0.005  0.007</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; treatment      -0.493 -0.083</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; senior         -0.555 -0.097</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; log(exposure2) -0.209  0.644</span></span></code></pre></div>
+<p>We may further evaluate the model based on posterior diagnostics and
+posterior predictive checks on the simulated versus observed proportion
+of zeros. Posterior predictive checks are easily visualized using the <a href="https://mc-stan.org/bayesplot/index.html">bayesplot</a>
+package.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># MCMC diagnostics for posterior draws of the regression coefficients</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">as.ts</span>(fit_blm<span class="sc">$</span>post.beta), <span class="at">main =</span> <span class="st">&#39;Trace plots&#39;</span>, <span class="at">cex.lab =</span> .<span class="dv">75</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># (Summary of) effective sample sizes across coefficients:</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">getEffSize</span>(fit_blm<span class="sc">$</span>post.beta)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3311    3348    3913    3731    3918    4168</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Posterior predictive check using bayesplot</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressMessages</span>(<span class="fu">library</span>(bayesplot))</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>prop_zero <span class="ot">&lt;-</span> <span class="cf">function</span>(y) <span class="fu">mean</span>(y <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>(<span class="fu">ppc_stat</span>(<span class="at">y=</span>roaches<span class="sc">$</span>y, <span class="at">yrep=</span>fit_blm<span class="sc">$</span>post.pred, <span class="at">stat =</span> <span class="st">&quot;prop_zero&quot;</span>))</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="bart-star" class="section level2">
+<h2>BART STAR</h2>
+<p>One of the most flexible model options is to use Bayesian Additive
+Regression Trees (BART; <span class="citation">Chipman, George, and
+McCulloch (<a href="#ref-chipman2010bart" role="doc-biblioref">2012</a>)</span>) as the latent regression
+model:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Get the model matrix of predictors (no intercept necessary)</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>X <span class="ot">=</span> <span class="fu">model.matrix</span>(y <span class="sc">~</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">+</span> roach1 <span class="sc">+</span> treatment <span class="sc">+</span> senior <span class="sc">+</span> exposure2,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">data =</span> roaches)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>fit_bart <span class="ot">=</span> <span class="fu">bart_star</span>(<span class="at">y =</span> y, <span class="at">X=</span>X, <span class="at">transformation =</span> <span class="st">&#39;np&#39;</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Burn-In Period&quot;</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;6.44 seconds remaining&quot;</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;1.58 seconds remaining&quot;</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Starting sampling&quot;</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;33.88 seconds remaining&quot;</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;28.82 seconds remaining&quot;</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;16.84 seconds remaining&quot;</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;6.94 seconds remaining&quot;</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Total time:  42 seconds&quot;</span></span></code></pre></div>
+<p>Once again, we can perform posterior predictive checks. This time we
+plot the densities.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_dens_overlay</span>(<span class="at">y=</span>roaches<span class="sc">$</span>y, <span class="at">yrep=</span>fit_bart<span class="sc">$</span>post.pred[<span class="dv">1</span><span class="sc">:</span><span class="dv">50</span>,])</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>With all Bayesian models, pointwise log-likelihoods and WAIC values
+are outputted for model comparison. Using this information, we can see
+the BART STAR model seems to have a better fit than the linear
+model.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>waic <span class="ot">&lt;-</span> <span class="fu">c</span>(fit_blm<span class="sc">$</span>WAIC, fit_bart<span class="sc">$</span>WAIC)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(waic) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;STAR w/ Linear Model&quot;</span>, <span class="st">&quot;STAR w/ BART&quot;</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(waic)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; STAR w/ Linear Model         STAR w/ BART </span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             1687.596             1639.103</span></span></code></pre></div>
+</div>
+<div id="other-models" class="section level2">
+<h2>Other Models</h2>
+<p><code>countSTAR</code> also implements Bayesian additive models. With
+the function <code>bam_star()</code>, we can specify covariates to be
+modeled linearly and others to be modeled non-linearly using spline
+bases. As a word of warning, the additive models do take significantly
+longer to fit. For exploring the relationship between one predictor and
+count outcome <span class="math inline">\(y\)</span>, one can also use
+spline regression as implemented in <code>spline_star()</code>. See the
+appropriate help pages for examples on how to run the models.</p>
+</div>
+</div>
+<div id="count-time-series-modeling-warpdlm" class="section level1">
+<h1>Count Time Series Modeling: warpDLM</h1>
+<p>Up to this point, all of the attention has focused on static
+regression where the data does not depend on time. However, the ideas of
+simultaneous transformation and rounding were extended to the time
+series domain in <span class="citation">King and Kowal (<a href="#ref-king2021warped" role="doc-biblioref">2021</a>)</span>. In
+that work, we proposed linking time-dependent count data <span class="math inline">\(y_t\)</span> to a powerful time series framework
+known as Dynamic Linear Models (DLMs). A DLM is defined by two
+equations: (i) the observation equation, which specifies how the
+observations are related to the latent state vector and (ii) the state
+evolution equation, which describes how the states are updated in a
+Markovian fashion. More concretely, we represent it in the following
+form: <span class="math display">\[\begin{align*}
+    z_t &amp;= F_t \theta_t + v_t, \quad v_t \sim N_n(0, V_t) \\
+    \theta_t &amp;= G_t \theta_{t-1} +  w_t, \quad w_t \sim N_p( 0, W_t)
+\end{align*}\]</span> for <span class="math inline">\(t=1,\ldots,
+T\)</span>, where <span class="math inline">\(\{ v_t,
+w_t\}_{t=1}^T\)</span> are mutually independent and <span class="math inline">\(\theta_0 \sim N_p(a_0, R_0)\)</span>.</p>
+<p>Of course, given the Gaussian assumptions of the model, a DLM alone
+is not appropriate for count data. Thus, a warping operation (the
+simultaneous transformation and rounding) is applied to the DLM,
+resulting in the count time series framework known as a warped DLM
+(warpDLM). More explicitly, it can be written as: <span class="math display">\[\begin{align*}
+         y_t &amp;= h \circ g^{-1}(z_t) \\
+        \{z_t\}_{t=1}^T &amp;\sim \text{DLM}
+\end{align*}\]</span></p>
+<p>The DLM form shown earlier is very general. To keep things simple,
+<code>countSTAR</code> implements only a few options for the DLM, namely
+the local level model and the local linear trend model. A local level
+model (also known as a random walk with noise model) has a univariate
+state <span class="math inline">\(\theta_t:=\mu_t\)</span>, and the DLM
+equations are simply <span class="math display">\[\begin{align*}
+    z_t &amp;= \mu_t + v_t, \quad v_t \sim N(0, V) \\
+    \mu_t &amp;= \mu_{t-1} +  w_t, \quad w_t \sim N(0, W)
+\end{align*}\]</span> The local linear trend model extends the local
+level model, incorporating a time varying drift <span class="math inline">\(\nu_t\)</span> in the dynamics. It is often
+described in the following three equation format: <span class="math display">\[\begin{align*}
+    z_t &amp;= \mu_t + v_t, \quad v_t \sim N(0, V) \\
+    \mu_t &amp;= \mu_{t-1} + \nu_{t-1} +  w_{\mu,t}, \quad w_{\mu,t}
+\sim N( 0, W_
+    \mu) \\
+    \nu_t &amp;= \nu_{t-1} +  w_{\nu,t}, \quad w_{\nu,t} \sim N( 0,
+W_\nu)
+\end{align*}\]</span> This can in turn be recast into the general
+two-equation DLM form. Namely, if we let <span class="math inline">\(\theta_t:=(\mu_t, \nu_t)\)</span>, the local
+linear trend is written as</p>
+<p><span class="math display">\[\begin{align*}
+z_t &amp; = \begin{pmatrix} 1 &amp; 0 \end{pmatrix} \begin{pmatrix}
+\mu_t \\ \nu_t \end{pmatrix} + v_t, \quad v_t \sim N(0, V) \\
+\begin{pmatrix} \mu_t \\ \nu_t \end{pmatrix} &amp; = \begin{bmatrix} 1
+&amp; 1 \\ 0 &amp; 1 \end{bmatrix} \begin{pmatrix} \mu_{t-1} \\
+\nu_{t-1} \end{pmatrix}  + \boldsymbol{w_t}, \quad \boldsymbol{w_t} \sim
+N\begin{pmatrix} \boldsymbol{0}, \begin{bmatrix} W_
+    \mu &amp; 0 \\ 0 &amp; W_\nu \end{bmatrix} \end{pmatrix}
+\end{align*}\]</span></p>
+<p>These two common forms have a long history and are also referred to
+as structural time series models (implemented in base R via
+<code>StructTS()</code>). With <code>countSTAR</code>, warpDLM time
+series modeling is accomplished via the <code>warpDLM()</code> function.
+In the below, we apply the model to a time series dataset included in
+base R concerning yearly numbers of important discoveries from 1860 to
+1959 (<code>?discoveries</code> for more information).</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Visualize the data</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(discoveries)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co">#Fit the model</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>warpfit <span class="ot">&lt;-</span> <span class="fu">warpDLM</span>(<span class="at">y=</span>discoveries, <span class="at">type=</span><span class="st">&quot;trend&quot;</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Time taken:  59.82  seconds&quot;</span></span></code></pre></div>
+<p>Once again, we can check fit using posterior predictive checks. The
+median of the posterior predictive draws can act as a sort of
+count-valued smoother of the time series.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_ribbon</span>(<span class="at">y=</span><span class="fu">as.vector</span>(discoveries), <span class="at">yrep=</span>warpfit<span class="sc">$</span>post_pred)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1 class="unnumbered">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-chipman2010bart" class="csl-entry">
+Chipman, Hugh A., Edward I. George, and Robert E. McCulloch. 2012.
+<span>“<span class="nocase">BART: Bayesian additive regression
+trees</span>.”</span> <em>Annals of Applied Statistics</em> 6 (1):
+266–98. <a href="https://doi.org/10.1214/09-AOAS285">https://doi.org/10.1214/09-AOAS285</a>.
+</div>
+<div id="ref-Gelman_Hill_2006" class="csl-entry">
+Gelman, Andrew, and Jennifer Hill. 2006. <em>Data Analysis Using
+Regression and Multilevel/Hierarchical Models</em>. Cambridge University
+Press.
+</div>
+<div id="ref-king2021warped" class="csl-entry">
+King, Brian, and Daniel R. Kowal. 2021. <span>“Warped Dynamic Linear
+Models for Time Series of Counts.”</span> <em>arXiv Preprint
+arXiv:2110.14790</em>. <a href="https://arxiv.org/abs/2110.14790">https://arxiv.org/abs/2110.14790</a>.
+</div>
+<div id="ref-Kowal2020a" class="csl-entry">
+Kowal, Daniel R., and Antonio Canale. 2020. <span>“Simultaneous
+Transformation and Rounding (STAR) Models for Integer-Valued
+Data.”</span> <em>Electronic Journal of Statistics</em> 14 (1). <a href="https://doi.org/10.1214/20-ejs1707">https://doi.org/10.1214/20-ejs1707</a>.
+</div>
+<div id="ref-kowal2021semiparametric" class="csl-entry">
+Kowal, Daniel R., and Bohan Wu. 2021. <span>“Semiparametric Count Data
+Regression for Self-Reported Mental Health.”</span> <em>Biometrics</em>.
+<a href="https://onlinelibrary.wiley.com/doi/10.1111/biom.13617">https://onlinelibrary.wiley.com/doi/10.1111/biom.13617</a>.
+</div>
+<div id="ref-kowalSTARconjugate" class="csl-entry">
+———. 2022. <span>“Semiparametric Discrete Data Regression with Monte
+Carlo Inference and Prediction.”</span> <a href="https://arxiv.org/abs/2110.12316">https://arxiv.org/abs/2110.12316</a>.
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
