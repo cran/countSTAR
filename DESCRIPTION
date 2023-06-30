@@ -1,10 +1,10 @@
 Package: countSTAR
 Type: Package
 Title: Flexible Modeling of Count Data
-Version: 1.0.1
+Version: 1.0.2
 Authors@R: c(
     person(given="Brian", family="King", email = "brianking387@gmail.com", role = c("aut", "cre")),
-    person(given=c("Daniel", "R."), family = "Kowal", email = "daniel.kowal@rice.edu", role = "aut"))
+    person(given="Dan", family = "Kowal", email = "daniel.r.kowal@gmail.com", role = "aut"))
 Description: For Bayesian and classical inference and prediction with count-valued data,
     Simultaneous Transformation and Rounding (STAR) Models provide a flexible, interpretable,
     and easy-to-use approach. STAR models the observed count data using a rounded 
@@ -31,15 +31,17 @@ Imports: stats, utils, coda, dbarts, FastGP, gbm, graphics, Matrix,
         spikeSlabGAM, splines2, randomForest, Rcpp, TruncatedNormal,
         truncdist, KFAS
 RoxygenNote: 7.2.3
-Suggests: knitr, rmarkdown, rstanarm, bayesplot, mgcv
+Suggests: knitr, rmarkdown, bayesplot, mgcv
 VignetteBuilder: knitr
 URL: https://bking124.github.io/countSTAR/
         https://github.com/bking124/countSTAR
 BugReports: https://github.com/bking124/countSTAR/issues
+Depends: R (>= 2.10)
+LazyData: true
 NeedsCompilation: yes
-Packaged: 2023-04-07 20:17:02 UTC; brian
+Packaged: 2023-06-29 21:33:30 UTC; brian
 Author: Brian King [aut, cre],
-  Daniel R. Kowal [aut]
+  Dan Kowal [aut]
 Maintainer: Brian King <brianking387@gmail.com>
 Repository: CRAN
-Date/Publication: 2023-04-10 14:30:06 UTC
+Date/Publication: 2023-06-30 18:30:08 UTC

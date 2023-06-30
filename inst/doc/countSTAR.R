@@ -5,9 +5,7 @@ knitr::opts_chunk$set(
 )
 
 ## ----roaches------------------------------------------------------------------
-# Source: http://mc-stan.org/rstanarm/articles/count.html
-#install.packages("rstanarm")
-data(roaches, package="rstanarm") 
+data(roaches, package="countSTAR") 
 
 # Roaches:
 y = roaches$y
