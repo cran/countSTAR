@@ -152,116 +152,6 @@ g_cdf = function(y, distribution = "np") {
   splinefun(t0, g0, method = 'monoH.FC')
 }
 #----------------------------------------------------------------------------
-#' Bayesian bootstrap-based transformation
-#'
-#' Compute one posterior draw from the smoothed transformation
-#' implied by (separate) Bayesian bootstrap models for the CDFs
-#' of \code{y} and \code{X}.
-#'
-#' @param y \code{n x 1} vector of observed counts
-#' @param zgrid optional vector of grid points for evaluating the CDF
-#' of z (\code{Fz})
-#' @param xtSigmax \code{n x 1} vector of \code{t(X_i) Sigma_theta X_i},
-#' where \code{Sigma_theta} is the prior variance
-#' @param sigma_epsilon latent standard deviation
-#' @param approx_Fz logical; if TRUE, use a normal approximation for \code{Fz},
-#' the marginal CDF of the latent z, which is faster and more stable
-#' @return A smooth monotone function which can be used for evaluations of the transformation
-#' at each posterior draw.
-#'
-#' @examples
-#' # Sample some data:
-#' y = rpois(n = 200, lambda = 5)
-#' # Compute 200 draws of g on a grid:
-#' t = seq(0, max(y), length.out = 100) # grid
-#' g_post = t(sapply(1:500, function(s) g_bnp(y, approx_Fz = TRUE)(t)))
-#' # Plot together:
-#' plot(t, t, ylim = range(g_post), type='n', ylab = 'g(t)',  main = 'Bayesian bootstrap posterior: g')
-#' apply(g_post, 1, function(g) lines(t, g, col='gray'))
-#' # And the posterior mean of g:
-#' lines(t, colMeans(g_post), lwd=3)
-#'
-#' @export
-g_bnp = function(y,
-                 xtSigmax = rep(0, length(y)),
-                 zgrid = NULL,
-                 sigma_epsilon = 1,
-                 approx_Fz = FALSE
-){
-
-  # Length:
-  n = length(y)
-
-  # Bayesian bootstrap for the CDF of y
-
-  # Dirichlet(1) weights:
-  weights_y = rgamma(n = n, shape = 1)
-  weights_y  = weights_y/sum(weights_y)
-
-  # CDF as a function:
-  F_y = function(t) sapply(t, function(ttemp)
-    n/(n+1)*sum(weights_y[y <= ttemp]))/sum(weights_y)
-
-  if(approx_Fz){
-    # Use a fast normal approximation for the CDF of z
-
-    # Pick a "representative" SD; faster than approximating Fz directly
-    sigma_approx = median(sqrt(sigma_epsilon^2 + xtSigmax))
-
-    # Approximate inverse function:
-    Fzinv = function(s) qnorm(s, sd = sigma_approx)
-
-  } else {
-    # Bayesian bootstrap for the CDF of z
-
-    # Dirichlet(1) weights:
-    weights_x = rgamma(n = n, shape = 1)
-    weights_x  = weights_x/sum(weights_x) # dirichlet weights
-
-    # Compute the CDF Fz on a grid:
-    if(is.null(zgrid)){
-      zgrid = sort(unique(sapply(range(xtSigmax), function(xtemp){
-        qnorm(seq(0.001, 0.999, length.out = 250),
-              mean = 0,
-              sd = sqrt(sigma_epsilon^2 + xtemp))
-
-      })))
-    }
-
-    # CDF on the grid:
-    Fz = rowSums(sapply(1:n, function(i){
-      weights_x[i]*pnorm(zgrid,
-                         mean = 0,# assuming prior mean zero
-                         sd = sqrt(sigma_epsilon^2 + xtSigmax[i])
-      )
-    }))
-
-    # Inverse function:
-    Fzinv = function(s) stats::spline(Fz, zgrid,
-                                      method = "hyman",
-                                      xout = s)$y
-    # https://stats.stackexchange.com/questions/390931/compute-quantile-function-from-a-mixture-of-normal-distribution/390936#390936
-
-    # Check the inverse:
-    # plot(zgrid, Fzinv(Fz)); abline(0,1)
-  }
-
-  # Apply the function g(), including some smoothing
-    # (the smoothing is necessary to avoid g_a_y = g_a_yp1 for *unobserved* y-values)
-  t0 = sort(unique(y)) # point for smoothing
-
-  # Initial transformation:
-  g0 = Fzinv(F_y(t0-1))
-
-  # Make sure we have only finite values of g0 (infinite values occur for F_y = 0 or F_y = 1)
-  t0 = t0[which(is.finite(g0))]; g0 = g0[which(is.finite(g0))]
-
-  # Return the smoothed (monotone) transformation:
-  return(splinefun(t0, g0, method = 'monoH.FC'))
-}
-
-
-#----------------------------------------------------------------------------
 #' Approximate inverse transformation
 #'
 #' Compute the inverse function of a transformation \code{g} based on a grid search.
@@ -299,6 +189,40 @@ g_inv_approx = function(g, t_grid) {
     sapply(s, function(si)
       t_grid[which.min(abs(si - g_grid))])
   }
+}
+#----------------------------------------------------------------------------
+#' Inverse transformation
+#'
+#' Compute the inverse transformation on a vector of real-valued inputs
+#' based on the marginal CDF of z and the marginal CDF of y.
+#'
+#' @param Fz_eval the marginal CDF of z evaluated on some inputs
+#' @param Fy_eval the marginal CDF of y evaluated on \code{y_grid}
+#' @param y_grid a grid of non-negative integers
+#' @return The inverse transformation function evaluated on the same inputs
+#' as \code{Fz_eval}.
+#'
+#' @note The inputs for \code{Fz_eval} do not need to be known to compute
+#' the inverse transformation, so they are not required for this function.
+#'
+#' The function will return \code{NA} if \code{Fz_eval} is greater than all
+#' \code{Fy_eval} values. When \code{y_max < Inf}, this implies that the inverse
+#' is \code{y_max}; otherwise, it means that \code{y_grid} needs to use
+#' larger values. Both are handled externally.
+#'
+#' @export
+g_inv = function(Fz_eval, Fy_eval, y_grid){
+
+  # Make sure F(z) is within [0,1] & vectorized
+  Fz_eval = pmin(pmax(Fz_eval, 0), 1)
+
+  # Find the interval indexes:
+  ind = findInterval(Fz_eval,
+                     c(0, Fy_eval),
+                     rightmost.closed = FALSE)
+
+  # The values of the inverse correspond to the y grid points:
+  y_grid[ind] # note: this will be NA if Fz_eval > max(Fy_eval)
 }
 #----------------------------------------------------------------------------
 #' Rounding function
@@ -382,13 +306,11 @@ a_j = function(j, y_max = Inf) {
 #' twofold increase in the expected counts for a one unit increase in x
 #' @param sigma_true standard deviation of the Gaussian innovation; default is zero.
 #' @param ar1 the autoregressive coefficient among the columns of the X matrix; default is zero.
-#' @param intercept a Boolean indicating whether an intercept column should be included
-#' in the returned design matrix; default is FALSE
 #' @param seed optional integer to set the seed for reproducible simulation; default is NULL
 #' which results in a different dataset after each run
 #'
 #' @return A named list with the simulated count response \code{y}, the simulated design matrix \code{X}
-#' (possibly including the intercept), the true expected counts \code{Ey},
+#' (including an intercept), the true expected counts \code{Ey},
 #' and the true regression coefficients \code{beta_true}.
 #'
 #' @note Specifying \code{sigma_true = sqrt(2*log(1 + a))} implies that the expected counts are
@@ -409,7 +331,6 @@ simulate_nb_lm = function(n = 100,
                           b_sig = log(2.0),
                           sigma_true = sqrt(2*log(1.0)),
                           ar1 = 0,
-                          intercept = FALSE,
                           seed = NULL
                           ){
 
@@ -443,11 +364,6 @@ simulate_nb_lm = function(n = 100,
 
   # Conditional expectation:
   Ey = exp(X%*%beta_true)*exp(sigma_true^2/2)
-
-  #Get rid of intercept
-  if(!intercept){
-    X = X[,-1]
-  }
 
   list(
     y = y,
@@ -551,14 +467,23 @@ simulate_nb_friedman = function(n = 100,
 #'
 #' @return A plot with the fitted values and the credible intervals against the data
 #'
-#' @import coda
+# #' @import coda
 #' @export
 plot_fitted = function(y, post_y, y_hat = NULL, alpha = 0.05, ...){
+
+  # Library required here:
+  if (!requireNamespace("coda", quietly = TRUE)) {
+    stop(
+      "Package \"coda\" must be installed to use this function.",
+      call. = FALSE
+    )
+  }
+
   # Number of observations:
   n = length(y)
 
   # Credible intervals:
-  ci = HPDinterval(as.mcmc(post_y), prob = 1 - alpha)
+  ci = coda::HPDinterval(coda::as.mcmc(post_y), prob = 1 - alpha)
 
   # Fitted values:
   if(is.null(y_hat)) y_hat = colMeans(post_y)
@@ -671,7 +596,84 @@ plot_coef = function(post_coefficients_1,
          length=0.08, angle=90, code=3, lwd=8, col='black')
   abline(h = 0, lwd=3, col='green', lty=2)
 }
+#' Compute highest posterior density (HPD) regions
+#'
+#' Given a vector of draws from the posterior (predictive) distribution,
+#' compute a \code{prob}% HPD region; i.e., the smallest set of values for which
+#' their cumulative probability exceeds \code{prob}.
+#'
+#' @param post_pred vector of draws from the posterior (predictive) distribution
+#' @param prob numeric scalar in (0,1) giving the target probability content of the region
+#' @param merge_gaps logical; if TRUE, add singleton points that are skipped over
+#' @return An ordered vector of values comprising the HPD region
+#'
+#' @note The HPD region is not necessarily contiguous. This function is primarily
+#' designed for discrete distributions, so that the unique values in \code{post_pred}
+#' accumulate multiple realizations. \code{merge_gaps} allows some smoothing over
+#' "skipped" points, e.g., \code{{0,1,3}} becomes \code{{0,1,2,3}}.
+#'
+#' @export
+HPDregion = function(post_pred, prob = 0.95, merge_gaps = FALSE){
 
+  # Probabilities at each support point:
+  emp_probs = table(post_pred)/length(post_pred)
+
+  # Support points:
+  y_supp = as.numeric(names(emp_probs))
+
+  # Order by decreasing probability:
+  order_ind = order(emp_probs, decreasing = TRUE)
+
+  # Cumulative probabilities along this order:
+  cum_probs = cumsum(emp_probs[order_ind])
+
+  # Which indices are needed to exceed the specified prob:
+  cutoff = which(cum_probs >= prob)[1]
+
+  # threshold probability
+  thresh = emp_probs[order_ind[cutoff]]
+
+  # HPD set: all values with prob >= threshold
+  keep = emp_probs >= thresh
+  y_keep = sort(y_supp[keep])
+
+  # Merge the points that are only 1 apart:
+  if(merge_gaps){
+    skip_points = which((diff(y_keep) == 2))
+    if(length(skip_points) >= 1){
+      y_keep = sort(c(y_keep, y_keep[skip_points] + 1))
+    }
+  }
+  return(y_keep)
+}
+#' Dirichlet sampler
+#'
+#' Compute one Monte Carlo draw from a Dirichlet distribution
+#'
+#' @param params the vector of (nonnegative) Dirichlet parameters
+#' @return the vector of the Dirichlet draw on the simplex
+#'
+#' @details
+#'
+#' This function computes one draw from a Dirichlet distribution.
+#' The output is on a simplex (nonnegative, sum to one) and has the same
+#' length as the input \code{params}.
+#'
+#' @examples
+#' # Example draw:
+#' rdir(params = c(1,2,3))
+#'
+#' @importFrom stats rgamma
+#' @export
+rdir = function(params){
+
+  # Draw independent Gammas, one for each:
+  weights_y = rgamma(n = length(params),
+                     shape = params)
+
+  # Normalize and return:
+  weights_y/sum(weights_y)
+}
 #####################################################################################################
 #' Compute Simultaneous Credible Bands
 #'
@@ -760,6 +762,7 @@ simBaS = function(sampFuns){
 #'
 #' @examples
 #' # ESS for iid simulations:
+#' library(coda)
 #' rand_iid = rnorm(n = 10^4)
 #' getEffSize(rand_iid)
 #'
@@ -767,11 +770,20 @@ simBaS = function(sampFuns){
 #' rand_ar1 = sapply(seq(0.1, 0.9, by = 0.1), function(x) arima.sim(n = 10^4, list(ar = x)))
 #' getEffSize(rand_ar1)
 #'
-#' @import coda
+# #' @import coda
 #' @export
 getEffSize = function(postX) {
-  if(is.null(dim(postX))) return(effectiveSize(postX))
-  summary(effectiveSize(as.mcmc(array(postX, c(dim(postX)[1], prod(dim(postX)[-1]))))))
+
+  # Library required here:
+  if (!requireNamespace("coda", quietly = TRUE)) {
+    stop(
+      "Package \"coda\" must be installed to use this function.",
+      call. = FALSE
+    )
+  }
+
+  if(is.null(dim(postX))) return(coda::effectiveSize(postX))
+  summary(coda::effectiveSize(coda::as.mcmc(array(postX, c(dim(postX)[1], prod(dim(postX)[-1]))))))
 }
 
 #----------------------------------------------------------------------------

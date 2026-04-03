@@ -10,9 +10,7 @@ spline_star_exact(
   transformation = "np",
   y_max = Inf,
   psi = 1000,
-  method_sigma = "mle",
-  approx_Fz = FALSE,
-  approx_Fy = FALSE,
+  nbasis = NULL,
   nsave = 1000,
   compute_marg = TRUE
 )
@@ -37,17 +35,7 @@ spline_star_exact(
 
 \item{psi}{prior variance (1/smoothing parameter)}
 
-\item{method_sigma}{method to estimate the latent data standard deviation; must be one of
-\itemize{
-\item "mle" use the MLE from the STAR EM algorithm
-\item "mmle" use the marginal MLE (Note: slower!)
-}}
-
-\item{approx_Fz}{logical; in BNP transformation, apply a (fast and stable)
-normal approximation for the marginal CDF of the latent data}
-
-\item{approx_Fy}{logical; in BNP transformation, approximate
-the marginal CDF of \code{y} using the empirical CDF}
+\item{nbasis}{number of spline basis functions; if NULL, use the default from \code{spikeSlabGAM::sm}}
 
 \item{nsave}{number of Monte Carlo simulations}
 
@@ -57,7 +45,7 @@ marginal likelihood}
 \value{
 a list with the following elements:
 \itemize{
-\item \code{post_ytilde}: \code{nsave x n} samples
+\item \code{post.pred}: \code{nsave x n} samples
 from the posterior predictive distribution at the observation points \code{tau}
 \item \code{marg_like}: the marginal likelihood (if requested; otherwise NULL)
 }

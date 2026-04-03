@@ -18,9 +18,9 @@ bart_star(
   k = 2,
   power = 2,
   base = 0.95,
-  nsave = 5000,
-  nburn = 5000,
-  nskip = 2,
+  nsave = 1000,
+  nburn = 1000,
+  nskip = 0,
   save_y_hat = FALSE,
   verbose = TRUE
 )
@@ -30,9 +30,9 @@ bart_star(
 
 \item{X}{\code{n x p} matrix of predictors}
 
-\item{X_test}{\code{n0 x p} matrix of predictors for test data}
+\item{X_test}{\code{n_test x p} matrix of predictors for test data}
 
-\item{y_test}{\code{n0 x 1} vector of the test data responses (used for
+\item{y_test}{\code{n_test x 1} vector of the test data responses (used for
 computing log-predictive scores)}
 
 \item{transformation}{transformation to use for the latent process; must be one of
@@ -93,7 +93,7 @@ a list with the following elements:
 (\code{NULL} if \code{X_test} is not given)
 \item \code{post.mu.test}: draws of the conditional mean of z_star at the test points \code{X_test}
 (\code{NULL} if \code{X_test} is not given)
-\item \code{post.log.pred.test}: draws of the log-predictive distribution for each of the \code{n0} test cases
+\item \code{post.log.pred.test}: draws of the log-predictive distribution for each of the \code{n_test} test cases
 (\code{NULL} if \code{X_test} is not given)
 \item \code{fitted.values}: the posterior mean of the conditional expectation of the counts \code{y}
 (\code{NULL} if \code{save_y_hat=FALSE})
@@ -144,7 +144,7 @@ of the transformation function.
 \examples{
 \donttest{
 # Simulate data with count-valued response y:
-sim_dat = simulate_nb_friedman(n = 100, p = 10)
+sim_dat = simulate_nb_friedman(n = 100, p = 5)
 y = sim_dat$y; X = sim_dat$X
 
 # BART-STAR with log-transformation:

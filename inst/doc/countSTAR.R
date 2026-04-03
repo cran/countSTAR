@@ -1,4 +1,4 @@
-## ---- include = FALSE---------------------------------------------------------
+## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
@@ -10,71 +10,60 @@ data(roaches, package="countSTAR")
 # Roaches:
 y = roaches$y
 
-# Function to plot the point mass function:
-stickplot = function(y, ...){
-  js = 0:max(y); 
-  plot(js, 
-       sapply(js, function(js) mean(js == y)), 
-       type='h', lwd=2, ...)
-}
-stickplot(y, main = 'PMF: Roaches Data',
-          xlab = 'Roaches', ylab = 'Probability mass')
+# Plot the PMF:
+plot(0:max(y), 
+     sapply(0:max(y), function(js) mean(js == y)), 
+     type='h', lwd=2, main = 'PMF: Roaches Data',
+     xlab = 'Roaches', ylab = 'Probability mass')
+
+## ----roaches-covar------------------------------------------------------------
+# Design matrix:
+X = model.matrix( ~ roach1 + treatment + senior + log(exposure2),
+                 data = roaches)
+
+head(X)
 
 ## ----freq-lm------------------------------------------------------------------
 library(countSTAR)
 
-# Select a transformation:
-transformation = 'np' # Estimated transformation using empirical CDF
-
-# EM algorithm for STAR (using the log-link)
-fit_em = lm_star(y ~ roach1 + treatment + senior + log(exposure2),
-                 data = roaches, transformation = transformation)
-
-
-# Dimensions:
-n = nrow(fit_em$X); p = ncol(fit_em$X)
+# EM algorithm for STAR linear regression
+fit = lm_star(y ~ roach1 + treatment + senior + log(exposure2),
+              data = roaches, 
+              transformation = 'np')
 
 # Fitted coefficients:
-round(coef(fit_em), 3)
+round(coef(fit), 3)
 
 ## ----conf---------------------------------------------------------------------
 # Confidence interval for all coefficients
-confint(fit_em)
+confint(fit)
 
 ## ----pval---------------------------------------------------------------------
 # P-values:
-print(pvals(fit_em))
+round(pvals(fit), 4)
 
 ## ----predict-lm---------------------------------------------------------------
 #Compute the predictive draws (just using observed points here)
-y_pred = predict(fit_em)
+y_pred = predict(fit)
 
 ## ----freq-ml------------------------------------------------------------------
-# Select a transformation:
-transformation = 'np' # Estimated transformation using empirical CDF
-
-# Construct data matrix
-y = roaches$y
-X = roaches[, c("roach1", "treatment", "senior", "exposure2")]
-
 #Fit STAR with random forests
-fit_rf = randomForest_star(y, X, transformation = transformation)
+suppressMessages(library(randomForest))
+fit_rf = randomForest_star(y = y, X = X[,-1], # no intercept 
+                           transformation = 'np')
 
 #Fit STAR with GBM
-fit_gbm = gbm_star(y, X, transformation = transformation)
+suppressMessages(library(gbm))
+fit_gbm = gbm_star(y = y, X = X[,-1], # no intercept 
+                   transformation = 'np')
 
 ## ----freq-modelcomp-----------------------------------------------------------
 #Look at -2*log-likelihood
-print(-2*c(fit_rf$logLik, fit_gbm$logLik))
+-2*c(fit_rf$logLik, fit_gbm$logLik)
 
-## ----bayes-lm, results='hide', message=FALSE----------------------------------
-X = model.matrix(y ~ roach1 + treatment + senior + log(exposure2),
-                 data = roaches)
-
-# Dimensions:
-n = nrow(X); p = ncol(X)
-
-fit_blm = blm_star(y = y, X=X, transformation = 'np')
+## ----bayes-lm, results='hide', message=FALSE, warning = FALSE-----------------
+fit_blm = blm_star(y = y, X = X, 
+                   transformation = 'bnp')
 
 ## ----estimates-bayes----------------------------------------------------------
 # Posterior mean of each coefficient:
@@ -88,40 +77,47 @@ ci_all_bayes = apply(fit_blm$post.beta,
 rownames(ci_all_bayes) = c('Lower', 'Upper')
 print(t(round(ci_all_bayes, 3)))
 
-## ----diag, warning=FALSE, message=FALSE---------------------------------------
-# MCMC diagnostics for posterior draws of the regression coefficients
-plot(as.ts(fit_blm$post.beta), main = 'Trace plots', cex.lab = .75)
+## ----mcmcdiag, warning=FALSE, message=FALSE-----------------------------------
+# MCMC diagnostics for posterior draws of the regression coefficients (excluding intercept)
+plot(as.ts(fit_blm$post.beta[,-1]), 
+     main = 'Trace plots', cex.lab = .75)
 
-# (Summary of) effective sample sizes across coefficients:
-getEffSize(fit_blm$post.beta)
+# (Summary of) effective sample sizes (excluding intercept)
+suppressMessages(library(coda))
+getEffSize(fit_blm$post.beta[,-1])
 
+## ----modeldiag, warning=FALSE, message=FALSE----------------------------------
 # Posterior predictive check using bayesplot
 suppressMessages(library(bayesplot))
-prop_zero <- function(y) mean(y == 0)
-(ppc_stat(y=roaches$y, yrep=fit_blm$post.pred, stat = "prop_zero"))
+prop_zero = function(y) mean(y == 0)
+ppc_stat(y = y, 
+          yrep = fit_blm$post.pred, 
+          stat = "prop_zero")
 
 ## ----bart---------------------------------------------------------------------
-#Get the model matrix of predictors (no intercept necessary)
-X = model.matrix(y ~ -1 + roach1 + treatment + senior + exposure2,
-                 data = roaches)
-
-fit_bart = bart_star(y = y, X=X, transformation = 'np')
+fit_bart = bart_star(y = y, X = X, 
+                     transformation = 'np')
 
 ## ----bartppc------------------------------------------------------------------
-ppc_dens_overlay(y=roaches$y, yrep=fit_bart$post.pred[1:50,])
+ppc_dens_overlay(y = y, 
+                 yrep = fit_bart$post.pred[1:50,])
 
 ## ----waic---------------------------------------------------------------------
 waic <- c(fit_blm$WAIC, fit_bart$WAIC)
-names(waic) <- c("STAR w/ Linear Model", "STAR w/ BART")
+names(waic) <- c("STAR Linear Model", "BART-STAR")
 print(waic)
 
 ## ----warpDLM------------------------------------------------------------------
 #Visualize the data
 plot(discoveries)
 
+# Required package:
+library(KFAS)
+
 #Fit the model
-warpfit <- warpDLM(y=discoveries, type="trend")
+warpfit = warpDLM(y = discoveries, type = "trend")
 
 ## ----warpPPC------------------------------------------------------------------
-ppc_ribbon(y=as.vector(discoveries), yrep=warpfit$post_pred)
+ppc_ribbon(y = as.vector(discoveries), 
+           yrep = warpfit$post_pred)
 

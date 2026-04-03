@@ -10,8 +10,8 @@ genMCMC_star(
   init_params,
   transformation = "np",
   y_max = Inf,
-  nsave = 5000,
-  nburn = 5000,
+  nsave = 1000,
+  nburn = 1000,
   nskip = 0,
   save_y_hat = FALSE,
   verbose = TRUE
@@ -118,6 +118,9 @@ distribution function (CDF), which is fully nonparametric ('np'), or the paramet
 alternatives based on Poisson ('pois') or Negative-Binomial ('neg-bin')
 distributions. For the parametric distributions, the parameters of the distribution
 are estimated using moments (means and variances) of \code{y}.
+
+For this generic function, the Bayesian nonparametric
+transformation(s) are not available.
 }
 \examples{
 # Simulate data with count-valued response y:
@@ -129,6 +132,10 @@ fit_log = genMCMC_star(y = y,
                          sample_params = function(y, params) sample_lm_gprior(y, X, params),
                          init_params = function(y) init_lm_gprior(y, X),
                          transformation = 'log')
+
+# What is included:
+names(fit_log)
+
 # Posterior mean of each coefficient:
 coef(fit_log)
 

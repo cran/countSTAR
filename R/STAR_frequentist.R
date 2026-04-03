@@ -5,8 +5,8 @@
 #' an EM algorithm.
 #'
 #' Standard function calls including
-#' \code{\link{coefficients}}, \code{\link{fitted}}, and \code{\link{residuals}} apply. Fitted values are the expectation
-#' at the MLEs, and as such are not necessarily count-valued.
+#' \code{\link{coefficients}}, \code{\link{fitted}}, and \code{\link{residuals}} apply.
+#' Fitted values are the expectation at the MLEs, and as such are not necessarily count-valued.
 #'
 #' @param formula an object of class "\code{\link{formula}}" (see \code{\link{lm}} for details on model specification)
 #' @param data an optional data frame, list or environment (or object coercible by as.data.frame to a data frame)
@@ -61,14 +61,15 @@
 #'
 #' @examples
 #' # Simulate data with count-valued response y:
-#' sim_dat = simulate_nb_lm(n = 100, p = 3)
-#' y = sim_dat$y; X = sim_dat$X
+#' sim_dat = simulate_nb_lm(n = 100, p = 5)
+#' y = sim_dat$y; X = sim_dat$X[,-1] # remove intercept
 #'
 #' # Fit model
-#' fit_em = lm_star(y~X)
+#' fit_em = lm_star(y ~ X)
 #'
 #' # Fitted coefficients:
 #' coef(fit_em)
+#'
 #' # Fitted values:
 #' y_hat = fitted(fit_em)
 #' plot(y_hat, y);
@@ -76,6 +77,7 @@
 #' # Residuals:
 #' plot(residuals(fit_em))
 #' qqnorm(residuals(fit_em)); qqline(residuals(fit_em))
+#'
 #' @export
 lm_star = function(formula, data=NULL, transformation = 'np',
                    y_max = Inf,
@@ -497,13 +499,13 @@ predict.lmstar <- function(object, newdata = NULL, interval=FALSE, level=0.95, N
 #' @examples
 #' #Simulate data with count-valued response y:
 #' sim_dat = simulate_nb_lm(n = 100, p = 2)
-#' y = sim_dat$y; X = sim_dat$X
+#' y = sim_dat$y; X = sim_dat$X[,-1] # remove intercept
 #'
-#' #Select a transformation:
+#' # Select a transformation:
 #' transformation = 'np'
 #'
 #' #Estimate model
-#' fit = lm_star(y~X, transformation=transformation)
+#' fit = lm_star(y~X, transformation = transformation)
 #'
 #' #Confidence interval for all parameters
 #' confint(fit)
@@ -511,7 +513,7 @@ predict.lmstar <- function(object, newdata = NULL, interval=FALSE, level=0.95, N
 #' @export
 confint.lmstar = function(object, parm,
                           level = 0.95,
-                           ...){
+                          ...){
   if (!inherits(object, "lmstar"))
     stop("Not a lmstar object")
 
@@ -646,7 +648,7 @@ confint.lmstar = function(object, parm,
 #' @examples
 #' # Simulate data with count-valued response y:
 #' sim_dat = simulate_nb_lm(n = 100, p = 2)
-#' y = sim_dat$y; X = sim_dat$X
+#' y = sim_dat$y; X = sim_dat$X[,-1] # remove intercept
 #'
 #' # Select a transformation:
 #' transformation = 'np'
@@ -713,7 +715,7 @@ pvals <- function(object){
 #' @param y_max a fixed and known upper bound for all observations; default is \code{Inf}
 #' @param sd_init add random noise for EM algorithm initialization scaled by \code{sd_init}
 #' times the Gaussian MLE standard deviation; default is 10
-#' @param tol tolerance for stopping the EM algorithm; default is 10^-10;
+#' @param tol tolerance for stopping the EM algorithm;
 #' @param max_iters maximum number of EM iterations before stopping; default is 1000
 #' @param ntree Number of trees to grow.
 #' This should not be set to too small a number, to ensure that every input row gets predicted at least a few times.
@@ -771,13 +773,13 @@ pvals <- function(object){
 #' @examples
 #' \donttest{
 #' # Simulate data with count-valued response y:
-#' sim_dat = simulate_nb_friedman(n = 100, p = 10)
+#' sim_dat = simulate_nb_friedman(n = 100, p = 5)
 #' y = sim_dat$y; X = sim_dat$X
 #'
 #' # EM algorithm for STAR (using the log-link)
+#' library(randomForest)
 #' fit_em = randomForest_star(y = y, X = X,
-#'                  transformation = 'log',
-#'                  max_iters = 100)
+#'                  transformation = 'log')
 #'
 #' # Fitted values (out-of-bag)
 #' y_hat = fitted(fit_em)
@@ -791,17 +793,21 @@ pvals <- function(object){
 #' fit_em$logLik
 #' }
 #'
-#' @import randomForest
+# #' @import randomForest
 #' @export
 randomForest_star = function(y, X, X.test = NULL,
                              transformation = 'np',
                              y_max = Inf,
                              sd_init = 10,
-                             tol = 10^-10,
+                             tol = 10^-3,
                              max_iters = 1000,
                              ntree=500,
                              mtry= max(floor(ncol(X)/3), 1),
                              nodesize = 5){
+
+  # Library required here:
+  if (!requireNamespace("randomForest", quietly = TRUE)) stop("Package \"randomForest\" must be installed to use this function.", call. = FALSE)
+  #----------------------------------------------------------------------------
 
   # Check: currently implemented for nonnegative integers
   if(any(y < 0) || any(y != floor(y)))
@@ -866,8 +872,8 @@ randomForest_star = function(y, X, X.test = NULL,
 
   # Initialize the parameters: add 1 in case of zeros
   z_hat = g(y + 1)
-  fit = randomForest(x = X, y = z_hat,
-                     ntree = ntree, mtry = mtry, nodesize = nodesize)
+  fit = randomForest::randomForest(x = X, y = z_hat,
+                                   ntree = ntree, mtry = mtry, nodesize = nodesize)
 
   # (Initial) Fitted values:
   mu_hat = fit$predicted
@@ -882,8 +888,8 @@ randomForest_star = function(y, X, X.test = NULL,
   # Randomize for EM initialization:
   if(sd_init > 0){
     z_hat = g(y + 1) + sd_init*sigma_hat*rnorm(n = n)
-    fit = randomForest(x = X, y = z_hat,
-                       ntree = ntree, mtry = mtry, nodesize = nodesize)
+    fit = randomForest::randomForest(x = X, y = z_hat,
+                                     ntree = ntree, mtry = mtry, nodesize = nodesize)
     mu_hat = fit$predicted; sigma_hat = sd(z_hat - mu_hat)
   }
 
@@ -913,8 +919,8 @@ randomForest_star = function(y, X, X.test = NULL,
     # ----------------------------------
     ## M-step: estimation
     # ----------------------------------
-    fit = randomForest(x = X, y = z_hat,
-                       ntree = ntree, mtry = mtry, nodesize = nodesize)
+    fit = randomForest::randomForest(x = X, y = z_hat,
+                                     ntree = ntree, mtry = mtry, nodesize = nodesize)
     mu_hat = fit$predicted
     sigma_hat = sqrt((sum(z2_hat) + sum(mu_hat^2) - 2*sum(z_hat*mu_hat))/n)
 
@@ -1058,7 +1064,7 @@ randomForest_star = function(y, X, X.test = NULL,
 #' @param y_max a fixed and known upper bound for all observations; default is \code{Inf}
 #' @param sd_init add random noise for EM algorithm initialization scaled by \code{sd_init}
 #' times the Gaussian MLE standard deviation; default is 10
-#' @param tol tolerance for stopping the EM algorithm; default is 10^-10;
+#' @param tol tolerance for stopping the EM algorithm
 #' @param max_iters maximum number of EM iterations before stopping; default is 1000
 #' @param n.trees Integer specifying the total number of trees to fit.
 #' This is equivalent to the number of iterations and the number of basis functions in the additive expansion.
@@ -1114,10 +1120,11 @@ randomForest_star = function(y, X, X.test = NULL,
 #'
 #' @examples
 #' # Simulate data with count-valued response y:
-#' sim_dat = simulate_nb_friedman(n = 100, p = 10)
+#' sim_dat = simulate_nb_friedman(n = 100, p = 5)
 #' y = sim_dat$y; X = sim_dat$X
 #'
 #' # EM algorithm for STAR (using the log-link)
+#' library(gbm)
 #' fit_em = gbm_star(y = y, X = X,
 #'                  transformation = 'log')
 #'
@@ -1135,18 +1142,22 @@ randomForest_star = function(y, X, X.test = NULL,
 #' # Log-likelihood at MLEs:
 #' fit_em$logLik
 #'
-#' @import gbm
+# #' @import gbm
 #' @export
 gbm_star = function(y, X, X.test = NULL,
                     transformation = 'np',
                     y_max = Inf,
                     sd_init = 10,
-                    tol = 10^-10,
+                    tol = 10^-3,
                     max_iters = 1000,
                     n.trees = 100,
                     interaction.depth = 1,
                     shrinkage = 0.1,
                     bag.fraction = 1){
+
+  # Library required here:
+  if (!requireNamespace("gbm", quietly = TRUE)) stop("Package \"gbm\" must be installed to use this function.", call. = FALSE)
+  #----------------------------------------------------------------------------
 
   # Check: currently implemented for nonnegative integers
   if(any(y < 0) || any(y != floor(y)))
@@ -1211,12 +1222,12 @@ gbm_star = function(y, X, X.test = NULL,
 
   # Initialize the parameters: add 1 in case of zeros
   z_hat = g(y + 1)
-  fit = gbm(y ~ ., data = data.frame(y = z_hat, X = X),
-            distribution = "gaussian", # Squared error loss
-            n.trees = n.trees,
-            interaction.depth = interaction.depth,
-            shrinkage = shrinkage,
-            bag.fraction = bag.fraction
+  fit = gbm::gbm(y ~ ., data = data.frame(y = z_hat, X = X),
+                 distribution = "gaussian", # Squared error loss
+                 n.trees = n.trees,
+                 interaction.depth = interaction.depth,
+                 shrinkage = shrinkage,
+                 bag.fraction = bag.fraction
   )
 
   # (Initial) Fitted values:
@@ -1232,12 +1243,12 @@ gbm_star = function(y, X, X.test = NULL,
   # Randomize for EM initialization:
   if(sd_init > 0){
     z_hat = g(y + 1) + sd_init*sigma_hat*rnorm(n = n)
-    fit = gbm(y ~ ., data = data.frame(y = z_hat, X = X),
-              distribution = "gaussian", # Squared error loss
-              n.trees = n.trees,
-              interaction.depth = interaction.depth,
-              shrinkage = shrinkage,
-              bag.fraction = bag.fraction
+    fit = gbm::gbm(y ~ ., data = data.frame(y = z_hat, X = X),
+                   distribution = "gaussian", # Squared error loss
+                   n.trees = n.trees,
+                   interaction.depth = interaction.depth,
+                   shrinkage = shrinkage,
+                   bag.fraction = bag.fraction
     )
     mu_hat = fit$fit; sigma_hat = sd(z_hat - mu_hat)
   }
@@ -1268,12 +1279,12 @@ gbm_star = function(y, X, X.test = NULL,
     # ----------------------------------
     ## M-step: estimation
     # ----------------------------------
-    fit = gbm(y ~ ., data = data.frame(y = z_hat, X = X),
-              distribution = "gaussian", # Squared error loss
-              n.trees = n.trees,
-              interaction.depth = interaction.depth,
-              shrinkage = shrinkage,
-              bag.fraction = bag.fraction
+    fit = gbm::gbm(y ~ ., data = data.frame(y = z_hat, X = X),
+                   distribution = "gaussian", # Squared error loss
+                   n.trees = n.trees,
+                   interaction.depth = interaction.depth,
+                   shrinkage = shrinkage,
+                   bag.fraction = bag.fraction
     )
     mu_hat = fit$fit
     sigma_hat = sqrt((sum(z2_hat) + sum(mu_hat^2) - 2*sum(z_hat*mu_hat))/n)
@@ -1510,12 +1521,12 @@ gbm_star = function(y, X, X.test = NULL,
 #'
 #' @export
 genEM_star = function(y,
-                   estimator,
-                   transformation = 'np',
-                   y_max = Inf,
-                   sd_init = 10,
-                   tol = 10^-10,
-                   max_iters = 1000){
+                      estimator,
+                      transformation = 'np',
+                      y_max = Inf,
+                      sd_init = 10,
+                      tol = 10^-10,
+                      max_iters = 1000){
 
   # Check: currently implemented for nonnegative integers
   if(any(y < 0) || any(y != floor(y)))

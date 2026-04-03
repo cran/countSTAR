@@ -8,7 +8,7 @@
 #' \item{y}{Number of roaches caught}
 #' \item{roach1}{Pretreatment number of roaches}
 #' \item{treatment}{Treatment indicator}
-#' \item{senior}{ Indicator for only elderly residents in building}
+#' \item{senior}{Indicator for only elderly residents in building}
 #' \item{exposure2}{Number of days for which the roach traps were used}
 #' }
 #' @source Gelman and Hill (2007); package `rstanarm`
